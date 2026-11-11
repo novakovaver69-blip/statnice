@@ -15,15 +15,17 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-ap
 .wrap{max-width:680px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:1.4rem;margin:0 0 4px}
 .sub{color:var(--muted);margin:0 0 16px;font-size:.9rem}
-.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
-.tab{flex:1;min-width:110px;padding:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;font:inherit;cursor:pointer}
-.tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab,.sbtn{flex:1;min-width:100px;padding:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;font:inherit;cursor:pointer}
+.sbtn{font-weight:600}
+.tab.on,.sbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs.t .tab{font-size:.92rem}
 .card,.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
 .card{min-height:180px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer;font-size:1.15rem;white-space:pre-wrap}
 small{display:block;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 .count{color:var(--muted);font-size:.85rem;margin:0 0 8px;display:flex;justify-content:space-between}
 .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-button.b{padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+button.b,label.b{padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer;display:inline-block}
 button.b.p{background:var(--accent);border-color:var(--accent);color:#fff}
 button.b.ok{border-color:var(--ok);color:var(--ok)}button.b.no{border-color:var(--bad);color:var(--bad)}
 textarea,input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;margin-top:6px}
@@ -32,8 +34,9 @@ textarea{min-height:90px;resize:vertical}
 .opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
 .opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,transparent)}
 .model{margin-top:12px;padding:12px;border-left:3px solid var(--accent);background:var(--bg);border-radius:6px;white-space:pre-wrap}
-details{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+details{margin-top:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
 summary{cursor:pointer;color:var(--accent)}
+code{background:var(--bg);padding:1px 5px;border-radius:5px;font-size:.85em}
 .muted{color:var(--muted)}
 .hide{display:none}
 </style>
@@ -41,15 +44,22 @@ summary{cursor:pointer;color:var(--accent)}
 <body>
 <div class="wrap">
   <h1>Finals Study Hub</h1>
-  <p class="sub">Flashcards use spaced repetition, like Anki. Everything saves in this browser; use Export backup to move it between devices.</p>
-  <div class="tabs">
+  <p class="sub">Pick a subject, then a type. Flashcards use spaced repetition like Anki. The number on a subject shows the cards waiting. Everything saves in this browser.</p>
+  <div class="tabs subs"></div>
+  <div class="tabs t">
     <button class="tab" data-t="cards">Flashcards</button>
     <button class="tab" data-t="open">Open answers</button>
     <button class="tab" data-t="closed">Closed answers</button>
   </div>
 
   <section id="s-cards"><div class="study"></div>
-    <details><summary>Add a flashcard</summary>
+    <details><summary>Import flashcards from a file</summary>
+      <p class="muted">Importing into: <b class="curs"></b>. One card per line: front, then a Tab, a semicolon <code>;</code> or <code> | </code>, then back. Excel/CSV files, and two columns copied from Word or Google Sheets, work.</p>
+      <textarea id="b-cards" placeholder="Co je validita?; Měří test to, co měřit má&#10;Medián | Prostřední hodnota seřazeného souboru"></textarea>
+      <div class="row"><button class="b p" data-a="imp" data-k="cards">Import</button><label class="b">Load a .txt / .csv file<input id="f-cards" type="file" accept=".txt,.csv,.tsv,text/plain" style="display:none"></label></div>
+      <p id="msg-cards" class="muted"></p>
+    </details>
+    <details><summary>Add one flashcard</summary>
       <textarea id="c-q" placeholder="Front (question or term)"></textarea>
       <textarea id="c-a" placeholder="Back (answer or definition)"></textarea>
       <div class="row"><button class="b p" data-a="addcard">Add card</button></div>
@@ -57,7 +67,13 @@ summary{cursor:pointer;color:var(--accent)}
   </section>
 
   <section id="s-open" class="hide"><div class="study"></div>
-    <details><summary>Add an open question</summary>
+    <details><summary>Import open questions from a file</summary>
+      <p class="muted">Importing into: <b class="curs"></b>. One question per line: the question, then a Tab, <code>;</code> or <code> | </code>, then the model answer. Write <code>\n</code> inside an answer for a new line.</p>
+      <textarea id="b-open" placeholder="Vysvětlete rozdíl mezi reliabilitou a validitou.; Reliabilita = spolehlivost měření.\nValidita = měří to, co má."></textarea>
+      <div class="row"><button class="b p" data-a="imp" data-k="open">Import</button><label class="b">Load a .txt / .csv file<input id="f-open" type="file" accept=".txt,.csv,.tsv,text/plain" style="display:none"></label></div>
+      <p id="msg-open" class="muted"></p>
+    </details>
+    <details><summary>Add one open question</summary>
       <textarea id="o-q" placeholder="Question"></textarea>
       <textarea id="o-a" placeholder="Model answer or key points"></textarea>
       <div class="row"><button class="b p" data-a="addopen">Add question</button></div>
@@ -65,7 +81,13 @@ summary{cursor:pointer;color:var(--accent)}
   </section>
 
   <section id="s-closed" class="hide"><div class="study"></div>
-    <details><summary>Add a multiple-choice question</summary>
+    <details><summary>Import closed questions from a file</summary>
+      <p class="muted">Importing into: <b class="curs"></b>. One question per line: question, then 2 to 6 options, then the correct letter (A to F) or number, all split by a Tab, <code>;</code> or <code> | </code>. Or skip the letter and put a <code>*</code> before the correct option.</p>
+      <textarea id="b-closed" placeholder="Který průměr je nejcitlivější na odlehlé hodnoty?; Medián; Modus; Aritmetický průměr; C&#10;Nejčastější hodnota je; Medián; *Modus; Průměr"></textarea>
+      <div class="row"><button class="b p" data-a="imp" data-k="closed">Import</button><label class="b">Load a .txt / .csv file<input id="f-closed" type="file" accept=".txt,.csv,.tsv,text/plain" style="display:none"></label></div>
+      <p id="msg-closed" class="muted"></p>
+    </details>
+    <details><summary>Add one multiple-choice question</summary>
       <textarea id="m-q" placeholder="Question"></textarea>
       <input id="m-o0" placeholder="Option A"><input id="m-o1" placeholder="Option B">
       <input id="m-o2" placeholder="Option C (optional)"><input id="m-o3" placeholder="Option D (optional)">
@@ -75,22 +97,18 @@ summary{cursor:pointer;color:var(--accent)}
   </section>
 
   <details><summary>Manage content</summary>
-    <p class="muted">The sample items are placeholders. Clear them when you’re ready to add your own.</p>
+    <p class="muted">Backups include all three subjects. Use them to move your content between devices.</p>
     <div class="row">
       <button class="b" data-a="export">Export backup</button>
-      <label style="padding:9px 14px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:var(--surface)">Import backup<input id="imp" type="file" accept="application/json" style="display:none"></label>
-      <button class="b no" data-a="clear" id="clearbtn">Clear all content</button>
+      <label class="b">Import backup<input id="imp" type="file" accept="application/json" style="display:none"></label>
+      <button class="b no" data-a="clear" id="clearbtn"></button>
     </div>
   </details>
 </div>
 
 <script>
-const SAMPLE={
- cards:[{q:"Example: What is photosynthesis?",a:"The process plants use to turn light, water and CO₂ into sugar and oxygen."},{q:"Example: Define opportunity cost.",a:"The value of the next best alternative you give up when you make a choice."}],
- open:[{q:"Example: Explain the causes of the First World War in your own words.",a:"Key points: alliances, militarism, imperial rivalry, nationalism, the assassination in Sarajevo as trigger."}],
- closed:[{q:"Example: Which planet is closest to the Sun?",o:["Venus","Mercury","Mars"],c:1}]
-};
-const KEY="finals-study-hub-v1";
+const SUBJECTS=["Metodologie","Statistika","Obecná"];
+const KEY="finals-study-hub-v2";
 const MIN=60000,DAY=864e5;
 const norm=c=>Object.assign({due:0,ivl:0,ease:2.5,reps:0,lapses:0},c);
 const isNew=c=>c.reps===0&&c.lapses===0&&c.due===0;
@@ -109,78 +127,122 @@ function sched(c,g){
  }
  return{ivl,ease,reps,lapses,due:Date.now()+ms};
 }
+const blank=()=>({cards:[],open:[],closed:[]});
 let D=null;
 try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!D||!D.cards)D=JSON.parse(JSON.stringify(SAMPLE));
-D.cards=D.cards.map(norm);
+if(!D||!D.subjects){
+ D={subjects:{}};
+ try{ // carry over anything real from the first version
+  const o=JSON.parse(localStorage.getItem("finals-study-hub-v1"));
+  if(o&&o.cards){const keep=a=>(a||[]).filter(x=>!String(x.q).startsWith("Example:"));
+   D.subjects[SUBJECTS[0]]={cards:keep(o.cards),open:keep(o.open),closed:keep(o.closed)}}
+ }catch(e){}
+}
+function fix(){SUBJECTS.forEach(s=>{const x=D.subjects[s]=D.subjects[s]||blank();x.cards=(x.cards||[]).map(norm);x.open=x.open||[];x.closed=x.closed||[]})}
+fix();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const st={tab:"cards",ci:0,flip:false,oi:0,rev:false,os:[0,0],mi:0,pick:null,ms:[0,0],arm:false};
-const empty=n=>`<div class="box muted">No ${n} yet. Add one below.</div>`;
+const st={sub:SUBJECTS[0],tab:"cards",flip:false,oi:0,rev:false,os:[0,0],mi:0,pick:null,ms:[0,0],arm:false,draft:"",cur:null};
+const S=()=>D.subjects[st.sub];
+const empty=n=>`<div class="box muted">No ${n} in ${esc(st.sub)} yet. Import a file or add one below.</div>`;
 const wrap=(i,n)=>(i+n)%n;
+const L="ABCDEF";
 
-function cardsV(){const n=D.cards.length;if(!n)return empty("flashcards");
+function cardsV(){const cs=S().cards,n=cs.length;if(!n)return empty("flashcards");
  const now=Date.now(),lim=now+20*MIN;
- const q=D.cards.filter(c=>c.due<=lim).sort((a,b)=>(isNew(a)-isNew(b))||a.due-b.due);
- const newN=D.cards.filter(isNew).length,dueN=D.cards.filter(c=>!isNew(c)&&c.due<=lim).length;
+ const q=cs.filter(c=>c.due<=lim).sort((a,b)=>(isNew(a)-isNew(b))||a.due-b.due);
+ const newN=cs.filter(isNew).length,dueN=cs.filter(c=>!isNew(c)&&c.due<=lim).length;
  const stats=`<div class="count"><span>New ${newN} · Due ${dueN}</span><span>${n} cards total</span></div>`;
  const c=q[0];st.cur=c||null;
- if(!c){const nx=Math.min(...D.cards.map(x=>x.due));return stats+`<div class="box"><small>Done</small>All caught up! The next card is due in ${fmt(nx-now)}.</div>`}
+ if(!c){const nx=Math.min(...cs.map(x=>x.due));return stats+`<div class="box"><small>Done</small>All caught up! The next card is due in ${fmt(nx-now)}.</div>`}
  const back=st.flip?`<div style="height:1px;background:var(--line);margin:16px 0"></div><small>Answer</small>${esc(c.a)}`:"";
  const btns=st.flip
   ?["Again","Hard","Good","Easy"].map((l,g)=>`<button class="b ${["no","","p","ok"][g]}" data-a="grade" data-g="${g}">${l}<br><small style="margin:0;text-transform:none;letter-spacing:0;color:inherit;opacity:.8">${fmt(sched(c,g).due-now)}</small></button>`).join("")
   :`<button class="b p" data-a="show">Show answer</button><button class="b no" data-a="cdel">Delete card</button>`;
  return stats+`<div class="card" ${st.flip?"":'data-a="show"'}><small>Question</small>${esc(c.q)}${back}</div><div class="row">${btns}</div><p class="muted" style="font-size:.8rem">Shortcuts: Space shows the answer, 1–4 rate it.</p>`}
 
-function openV(){const n=D.open.length;if(!n)return empty("open questions");const q=D.open[st.oi];
+function openV(){const a=S().open,n=a.length;if(!n)return empty("open questions");const q=a[st.oi];
 return `<div class="count"><span>Question ${st.oi+1} of ${n}</span><span>Self-scored: ${st.os[0]} / ${st.os[1]}</span></div>
 <div class="box"><small>Question</small>${esc(q.q)}<textarea id="ans" placeholder="Write your answer here…">${esc(st.draft||"")}</textarea>
 ${st.rev?`<div class="model"><small>Model answer</small>${esc(q.a)}</div><div class="row"><button class="b ok" data-a="ogot">I got it</button><button class="b no" data-a="omiss">Missed it</button></div>`:`<div class="row"><button class="b p" data-a="orev">Reveal model answer</button><button class="b" data-a="onext">Skip</button><button class="b no" data-a="odel">Delete</button></div>`}</div>`}
 
-function closedV(){const n=D.closed.length;if(!n)return empty("multiple-choice questions");const q=D.closed[st.mi];
+function closedV(){const a=S().closed,n=a.length;if(!n)return empty("multiple-choice questions");const q=a[st.mi];
 const opts=q.o.map((t,i)=>{let k="opt";if(st.pick!==null){if(i===q.c)k+=" right";else if(i===st.pick)k+=" wrong"}
-return `<button class="${k}" data-a="pick" data-i="${i}">${"ABCD"[i]}. ${esc(t)}</button>`}).join("");
+return `<button class="${k}" data-a="pick" data-i="${i}">${L[i]}. ${esc(t)}</button>`}).join("");
 return `<div class="count"><span>Question ${st.mi+1} of ${n}</span><span>Score: ${st.ms[0]} / ${st.ms[1]}</span></div>
 <div class="box"><small>Question</small>${esc(q.q)}${opts}
-${st.pick!==null?`<p>${st.pick===q.c?"✓ Correct":"✗ The correct answer is "+"ABCD"[q.c]+"."}</p>`:""}
+${st.pick!==null?`<p>${st.pick===q.c?"✓ Correct":"✗ The correct answer is "+L[q.c]+"."}</p>`:""}
 <div class="row"><button class="b p" data-a="mnext">Next →</button><button class="b no" data-a="mdel">Delete</button></div></div>`}
 
 function render(){
+ const lim=Date.now()+20*MIN;
+ $(".subs").innerHTML=SUBJECTS.map(s=>{const k=D.subjects[s].cards.filter(x=>x.due<=lim).length;
+  return `<button class="sbtn${s===st.sub?" on":""}" data-s="${s}">${s}${k?` (${k})`:""}</button>`}).join("");
  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===st.tab));
  ["cards","open","closed"].forEach(t=>$("#s-"+t).classList.toggle("hide",t!==st.tab));
+ document.querySelectorAll(".curs").forEach(e=>e.textContent=st.sub);
  $("#s-cards .study").innerHTML=cardsV();
  $("#s-open .study").innerHTML=openV();
  $("#s-closed .study").innerHTML=closedV();
- $("#clearbtn").textContent=st.arm?"Click again to confirm":"Clear all content";
+ $("#clearbtn").textContent=st.arm?"Click again to confirm":"Clear "+st.sub;
 }
 
-function clamp(){st.ci=Math.min(st.ci,Math.max(D.cards.length-1,0));st.oi=Math.min(st.oi,Math.max(D.open.length-1,0));st.mi=Math.min(st.mi,Math.max(D.closed.length-1,0))}
-function onext(){st.oi=D.open.length?(st.oi+1)%D.open.length:0;st.rev=false;st.draft=""}
+// ---------- importing ----------
+const clean=s=>s.trim().replace(/^"([\s\S]*)"$/,"$1").replace(/""/g,'"').replace(/\\n/g,"\n").trim();
+function parse(text){const rows=[];
+ text.replace(/^\uFEFF/,"").split(/\r?\n/).forEach(l=>{l=l.trim();if(!l)return;
+  const sep=["\t"," | ",";"].find(s=>l.includes(s));if(!sep)return;
+  rows.push(l.split(sep).map(clean))});
+ return rows}
+function impPairs(text,k){let n=0;
+ parse(text).forEach(r=>{const q=r[0],a=r.slice(1).filter(Boolean).join("; ");
+  if(q&&a){S()[k].push(k==="cards"?norm({q,a}):{q,a});n++}});
+ return n}
+function impClosed(text){let n=0;
+ parse(text).forEach(r=>{if(r.length<4)return;const q=r[0];let rest=r.slice(1),c=-1;
+  const last=rest[rest.length-1];
+  if(/^[A-Fa-f1-6]$/.test(last)&&rest.length>=3){c=isNaN(last)?L.indexOf(last.toUpperCase()):+last-1;rest=rest.slice(0,-1)}
+  else{c=rest.findIndex(o=>o.startsWith("*"));rest=rest.map(o=>o.replace(/^\*\s*/,""))}
+  const keep=rest.map((o,i)=>[o,i]).filter(x=>x[0]);const nc=keep.findIndex(x=>x[1]===c);
+  if(q&&keep.length>=2&&keep.length<=6&&nc>-1){S().closed.push({q,o:keep.map(x=>x[0]),c:nc});n++}});
+ return n}
+async function readFile(f){const b=await f.arrayBuffer();
+ try{return new TextDecoder("utf-8",{fatal:true}).decode(b)}catch(e){return new TextDecoder("windows-1250").decode(b)}}
+
+function clamp(){const s=S();st.oi=Math.min(st.oi,Math.max(s.open.length-1,0));st.mi=Math.min(st.mi,Math.max(s.closed.length-1,0))}
+function onext(){const n=S().open.length;st.oi=n?(st.oi+1)%n:0;st.rev=false;st.draft=""}
 
 document.addEventListener("click",e=>{
+ const sb=e.target.closest(".sbtn");
+ if(sb){st.sub=sb.dataset.s;Object.assign(st,{flip:false,oi:0,rev:false,os:[0,0],mi:0,pick:null,ms:[0,0],draft:"",arm:false});render();return}
  const t=e.target.closest(".tab");if(t){st.tab=t.dataset.t;render();return}
  const el=e.target.closest("[data-a]");if(!el)return;const a=el.dataset.a;
  if(a!=="clear")st.arm=false;
  const ta=$("#ans");if(ta)st.draft=ta.value;
+ const s=S();
  switch(a){
   case"show":st.flip=true;break;
   case"grade":{const c=st.cur;if(c){Object.assign(c,sched(c,+el.dataset.g));st.flip=false;save()}break}
-  case"cdel":{const i=D.cards.indexOf(st.cur);if(i>-1)D.cards.splice(i,1);st.flip=false;save();break}
-  case"export":{try{const u=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:"application/json"}));const l=document.createElement("a");l.href=u;l.download="study-backup.json";l.click();URL.revokeObjectURL(u)}catch(err){}break}
+  case"cdel":{const i=s.cards.indexOf(st.cur);if(i>-1)s.cards.splice(i,1);st.flip=false;save();break}
   case"orev":st.rev=true;break;
   case"ogot":st.os[0]++;st.os[1]++;onext();break;
   case"omiss":st.os[1]++;onext();break;
   case"onext":onext();break;
-  case"odel":D.open.splice(st.oi,1);clamp();st.rev=false;st.draft="";save();break;
-  case"pick":if(st.pick===null){st.pick=+el.dataset.i;st.ms[1]++;if(st.pick===D.closed[st.mi].c)st.ms[0]++}break;
-  case"mnext":st.mi=wrap(st.mi+1,D.closed.length);st.pick=null;break;
-  case"mdel":D.closed.splice(st.mi,1);clamp();st.pick=null;save();break;
-  case"addcard":{const q=$("#c-q").value.trim(),an=$("#c-a").value.trim();if(!q||!an)return;D.cards.push(norm({q,a:an}));$("#c-q").value=$("#c-a").value="";st.flip=false;save();break}
-  case"addopen":{const q=$("#o-q").value.trim(),an=$("#o-a").value.trim();if(!q||!an)return;D.open.push({q,a:an});$("#o-q").value=$("#o-a").value="";st.oi=D.open.length-1;st.rev=false;st.draft="";save();break}
+  case"odel":s.open.splice(st.oi,1);clamp();st.rev=false;st.draft="";save();break;
+  case"pick":if(st.pick===null){st.pick=+el.dataset.i;st.ms[1]++;if(st.pick===s.closed[st.mi].c)st.ms[0]++}break;
+  case"mnext":st.mi=wrap(st.mi+1,s.closed.length);st.pick=null;break;
+  case"mdel":s.closed.splice(st.mi,1);clamp();st.pick=null;save();break;
+  case"imp":{const k=el.dataset.k,box=$("#b-"+k);const n=k==="closed"?impClosed(box.value):impPairs(box.value,k);
+   if(n){box.value="";save()}
+   $("#msg-"+k).textContent=n?`Imported ${n} into ${st.sub}.`:"Nothing imported. Each line needs a Tab, a semicolon or ' | ' between the parts.";
+   st.flip=false;break}
+  case"addcard":{const q=$("#c-q").value.trim(),an=$("#c-a").value.trim();if(!q||!an)return;s.cards.push(norm({q,a:an}));$("#c-q").value=$("#c-a").value="";st.flip=false;save();break}
+  case"addopen":{const q=$("#o-q").value.trim(),an=$("#o-a").value.trim();if(!q||!an)return;s.open.push({q,a:an});$("#o-q").value=$("#o-a").value="";st.oi=s.open.length-1;st.rev=false;st.draft="";save();break}
   case"addmc":{const q=$("#m-q").value.trim();const o=[0,1,2,3].map(i=>$("#m-o"+i).value.trim()).filter(Boolean);const c=+$("#m-c").value;
-   if(!q||o.length<2||c>=o.length)return;D.closed.push({q,o,c});["#m-q","#m-o0","#m-o1","#m-o2","#m-o3"].forEach(s=>$(s).value="");st.mi=D.closed.length-1;st.pick=null;save();break}
-  case"clear":if(!st.arm){st.arm=true}else{D={cards:[],open:[],closed:[]};st.arm=false;st.ci=st.oi=st.mi=0;save()}break;
+   if(!q||o.length<2||c>=o.length)return;s.closed.push({q,o,c});["#m-q","#m-o0","#m-o1","#m-o2","#m-o3"].forEach(x=>$(x).value="");st.mi=s.closed.length-1;st.pick=null;save();break}
+  case"export":{try{const u=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:"application/json"}));const l=document.createElement("a");l.href=u;l.download="study-backup.json";l.click();URL.revokeObjectURL(u)}catch(err){}break}
+  case"clear":if(!st.arm){st.arm=true}else{D.subjects[st.sub]=blank();st.arm=false;st.oi=st.mi=0;save()}break;
  }
  render();
 });
@@ -190,8 +252,10 @@ document.addEventListener("keydown",e=>{
  else if(st.flip&&["1","2","3","4"].includes(e.key)){const c=st.cur;Object.assign(c,sched(c,+e.key-1));st.flip=false;save();render()}
 });
 document.addEventListener("change",e=>{
- if(e.target.id!=="imp")return;const f=e.target.files[0];if(!f)return;
- f.text().then(t=>{try{const j=JSON.parse(t);if(j&&j.cards&&j.open&&j.closed){D=j;D.cards=D.cards.map(norm);save();clamp();st.flip=false;render()}}catch(err){}});
+ const id=e.target.id,f=e.target.files&&e.target.files[0];if(!f)return;
+ const m=id.match(/^f-(cards|open|closed)$/);
+ if(m){readFile(f).then(t=>{$("#b-"+m[1]).value=t;$("#msg-"+m[1]).textContent="File loaded. Check the text, then click Import.";e.target.value=""});return}
+ if(id==="imp"){f.text().then(t=>{try{const j=JSON.parse(t);if(j&&j.subjects){D=j;fix();save();clamp();st.flip=false;render()}}catch(err){}})}
 });
 render();
 </script>
