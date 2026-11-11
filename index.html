@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finals Study Hub</title>
+<style>
+:root{--bg:#f7f6f2;--surface:#fff;--text:#1f2328;--muted:#6b7280;--accent:#2f6fed;--ok:#1a7f4b;--bad:#c0392b;--line:#e3e1da;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--surface:#1f2226;--text:#e8e8e6;--muted:#9aa0a6;--accent:#6b9bff;--ok:#4cc38a;--bad:#ff7b6b;--line:#33373d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15171a;--surface:#1f2226;--text:#e8e8e6;--muted:#9aa0a6;--accent:#6b9bff;--ok:#4cc38a;--bad:#ff7b6b;--line:#33373d;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.4rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.9rem}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{flex:1;min-width:110px;padding:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:10px;font:inherit;cursor:pointer}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.card,.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card{min-height:180px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer;font-size:1.15rem;white-space:pre-wrap}
+small{display:block;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.count{color:var(--muted);font-size:.85rem;margin:0 0 8px;display:flex;justify-content:space-between}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+button.b{padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+button.b.p{background:var(--accent);border-color:var(--accent);color:#fff}
+button.b.ok{border-color:var(--ok);color:var(--ok)}button.b.no{border-color:var(--bad);color:var(--bad)}
+textarea,input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;margin-top:6px}
+textarea{min-height:90px;resize:vertical}
+.opt{display:block;width:100%;text-align:left;margin-top:8px;padding:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;font:inherit;cursor:pointer}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,transparent)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,transparent)}
+.model{margin-top:12px;padding:12px;border-left:3px solid var(--accent);background:var(--bg);border-radius:6px;white-space:pre-wrap}
+details{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;color:var(--accent)}
+.muted{color:var(--muted)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Finals Study Hub</h1>
+  <p class="sub">Flashcards use spaced repetition, like Anki. Everything saves in this browser; use Export backup to move it between devices.</p>
+  <div class="tabs">
+    <button class="tab" data-t="cards">Flashcards</button>
+    <button class="tab" data-t="open">Open answers</button>
+    <button class="tab" data-t="closed">Closed answers</button>
+  </div>
+
+  <section id="s-cards"><div class="study"></div>
+    <details><summary>Add a flashcard</summary>
+      <textarea id="c-q" placeholder="Front (question or term)"></textarea>
+      <textarea id="c-a" placeholder="Back (answer or definition)"></textarea>
+      <div class="row"><button class="b p" data-a="addcard">Add card</button></div>
+    </details>
+  </section>
+
+  <section id="s-open" class="hide"><div class="study"></div>
+    <details><summary>Add an open question</summary>
+      <textarea id="o-q" placeholder="Question"></textarea>
+      <textarea id="o-a" placeholder="Model answer or key points"></textarea>
+      <div class="row"><button class="b p" data-a="addopen">Add question</button></div>
+    </details>
+  </section>
+
+  <section id="s-closed" class="hide"><div class="study"></div>
+    <details><summary>Add a multiple-choice question</summary>
+      <textarea id="m-q" placeholder="Question"></textarea>
+      <input id="m-o0" placeholder="Option A"><input id="m-o1" placeholder="Option B">
+      <input id="m-o2" placeholder="Option C (optional)"><input id="m-o3" placeholder="Option D (optional)">
+      <select id="m-c"><option value="0">Correct: A</option><option value="1">Correct: B</option><option value="2">Correct: C</option><option value="3">Correct: D</option></select>
+      <div class="row"><button class="b p" data-a="addmc">Add question</button></div>
+    </details>
+  </section>
+
+  <details><summary>Manage content</summary>
+    <p class="muted">The sample items are placeholders. Clear them when you’re ready to add your own.</p>
+    <div class="row">
+      <button class="b" data-a="export">Export backup</button>
+      <label style="padding:9px 14px;border:1px solid var(--line);border-radius:9px;cursor:pointer;background:var(--surface)">Import backup<input id="imp" type="file" accept="application/json" style="display:none"></label>
+      <button class="b no" data-a="clear" id="clearbtn">Clear all content</button>
+    </div>
+  </details>
+</div>
+
+<script>
+const SAMPLE={
+ cards:[{q:"Example: What is photosynthesis?",a:"The process plants use to turn light, water and CO₂ into sugar and oxygen."},{q:"Example: Define opportunity cost.",a:"The value of the next best alternative you give up when you make a choice."}],
+ open:[{q:"Example: Explain the causes of the First World War in your own words.",a:"Key points: alliances, militarism, imperial rivalry, nationalism, the assassination in Sarajevo as trigger."}],
+ closed:[{q:"Example: Which planet is closest to the Sun?",o:["Venus","Mercury","Mars"],c:1}]
+};
+const KEY="finals-study-hub-v1";
+const MIN=60000,DAY=864e5;
+const norm=c=>Object.assign({due:0,ivl:0,ease:2.5,reps:0,lapses:0},c);
+const isNew=c=>c.reps===0&&c.lapses===0&&c.due===0;
+const fmt=ms=>ms<MIN*60?Math.max(1,Math.round(ms/MIN))+"m":ms<DAY?Math.round(ms/36e5)+"h":ms<30*DAY?Math.round(ms/DAY)+"d":(ms/DAY/30).toFixed(1)+"mo";
+// Anki-style scheduling. g: 0 Again, 1 Hard, 2 Good, 3 Easy
+function sched(c,g){
+ let{ivl,ease,reps,lapses}=c,ms;
+ if(g===0){ease=Math.max(1.3,ease-.2);reps=0;lapses++;ivl=0;ms=10*MIN}
+ else{
+  let d;
+  if(reps===0)d=[0,1,2,4][g];
+  else if(g===1){d=Math.max(ivl+1,Math.round(ivl*1.2));ease=Math.max(1.3,ease-.15)}
+  else if(g===2)d=Math.max(ivl+1,Math.round(ivl*ease));
+  else{d=Math.max(ivl+2,Math.round(ivl*ease*1.3));ease+=.15}
+  reps++;ivl=d;ms=d*DAY;
+ }
+ return{ivl,ease,reps,lapses,due:Date.now()+ms};
+}
+let D=null;
+try{D=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!D||!D.cards)D=JSON.parse(JSON.stringify(SAMPLE));
+D.cards=D.cards.map(norm);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const st={tab:"cards",ci:0,flip:false,oi:0,rev:false,os:[0,0],mi:0,pick:null,ms:[0,0],arm:false};
+const empty=n=>`<div class="box muted">No ${n} yet. Add one below.</div>`;
+const wrap=(i,n)=>(i+n)%n;
+
+function cardsV(){const n=D.cards.length;if(!n)return empty("flashcards");
+ const now=Date.now(),lim=now+20*MIN;
+ const q=D.cards.filter(c=>c.due<=lim).sort((a,b)=>(isNew(a)-isNew(b))||a.due-b.due);
+ const newN=D.cards.filter(isNew).length,dueN=D.cards.filter(c=>!isNew(c)&&c.due<=lim).length;
+ const stats=`<div class="count"><span>New ${newN} · Due ${dueN}</span><span>${n} cards total</span></div>`;
+ const c=q[0];st.cur=c||null;
+ if(!c){const nx=Math.min(...D.cards.map(x=>x.due));return stats+`<div class="box"><small>Done</small>All caught up! The next card is due in ${fmt(nx-now)}.</div>`}
+ const back=st.flip?`<div style="height:1px;background:var(--line);margin:16px 0"></div><small>Answer</small>${esc(c.a)}`:"";
+ const btns=st.flip
+  ?["Again","Hard","Good","Easy"].map((l,g)=>`<button class="b ${["no","","p","ok"][g]}" data-a="grade" data-g="${g}">${l}<br><small style="margin:0;text-transform:none;letter-spacing:0;color:inherit;opacity:.8">${fmt(sched(c,g).due-now)}</small></button>`).join("")
+  :`<button class="b p" data-a="show">Show answer</button><button class="b no" data-a="cdel">Delete card</button>`;
+ return stats+`<div class="card" ${st.flip?"":'data-a="show"'}><small>Question</small>${esc(c.q)}${back}</div><div class="row">${btns}</div><p class="muted" style="font-size:.8rem">Shortcuts: Space shows the answer, 1–4 rate it.</p>`}
+
+function openV(){const n=D.open.length;if(!n)return empty("open questions");const q=D.open[st.oi];
+return `<div class="count"><span>Question ${st.oi+1} of ${n}</span><span>Self-scored: ${st.os[0]} / ${st.os[1]}</span></div>
+<div class="box"><small>Question</small>${esc(q.q)}<textarea id="ans" placeholder="Write your answer here…">${esc(st.draft||"")}</textarea>
+${st.rev?`<div class="model"><small>Model answer</small>${esc(q.a)}</div><div class="row"><button class="b ok" data-a="ogot">I got it</button><button class="b no" data-a="omiss">Missed it</button></div>`:`<div class="row"><button class="b p" data-a="orev">Reveal model answer</button><button class="b" data-a="onext">Skip</button><button class="b no" data-a="odel">Delete</button></div>`}</div>`}
+
+function closedV(){const n=D.closed.length;if(!n)return empty("multiple-choice questions");const q=D.closed[st.mi];
+const opts=q.o.map((t,i)=>{let k="opt";if(st.pick!==null){if(i===q.c)k+=" right";else if(i===st.pick)k+=" wrong"}
+return `<button class="${k}" data-a="pick" data-i="${i}">${"ABCD"[i]}. ${esc(t)}</button>`}).join("");
+return `<div class="count"><span>Question ${st.mi+1} of ${n}</span><span>Score: ${st.ms[0]} / ${st.ms[1]}</span></div>
+<div class="box"><small>Question</small>${esc(q.q)}${opts}
+${st.pick!==null?`<p>${st.pick===q.c?"✓ Correct":"✗ The correct answer is "+"ABCD"[q.c]+"."}</p>`:""}
+<div class="row"><button class="b p" data-a="mnext">Next →</button><button class="b no" data-a="mdel">Delete</button></div></div>`}
+
+function render(){
+ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===st.tab));
+ ["cards","open","closed"].forEach(t=>$("#s-"+t).classList.toggle("hide",t!==st.tab));
+ $("#s-cards .study").innerHTML=cardsV();
+ $("#s-open .study").innerHTML=openV();
+ $("#s-closed .study").innerHTML=closedV();
+ $("#clearbtn").textContent=st.arm?"Click again to confirm":"Clear all content";
+}
+
+function clamp(){st.ci=Math.min(st.ci,Math.max(D.cards.length-1,0));st.oi=Math.min(st.oi,Math.max(D.open.length-1,0));st.mi=Math.min(st.mi,Math.max(D.closed.length-1,0))}
+function onext(){st.oi=D.open.length?(st.oi+1)%D.open.length:0;st.rev=false;st.draft=""}
+
+document.addEventListener("click",e=>{
+ const t=e.target.closest(".tab");if(t){st.tab=t.dataset.t;render();return}
+ const el=e.target.closest("[data-a]");if(!el)return;const a=el.dataset.a;
+ if(a!=="clear")st.arm=false;
+ const ta=$("#ans");if(ta)st.draft=ta.value;
+ switch(a){
+  case"show":st.flip=true;break;
+  case"grade":{const c=st.cur;if(c){Object.assign(c,sched(c,+el.dataset.g));st.flip=false;save()}break}
+  case"cdel":{const i=D.cards.indexOf(st.cur);if(i>-1)D.cards.splice(i,1);st.flip=false;save();break}
+  case"export":{try{const u=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:"application/json"}));const l=document.createElement("a");l.href=u;l.download="study-backup.json";l.click();URL.revokeObjectURL(u)}catch(err){}break}
+  case"orev":st.rev=true;break;
+  case"ogot":st.os[0]++;st.os[1]++;onext();break;
+  case"omiss":st.os[1]++;onext();break;
+  case"onext":onext();break;
+  case"odel":D.open.splice(st.oi,1);clamp();st.rev=false;st.draft="";save();break;
+  case"pick":if(st.pick===null){st.pick=+el.dataset.i;st.ms[1]++;if(st.pick===D.closed[st.mi].c)st.ms[0]++}break;
+  case"mnext":st.mi=wrap(st.mi+1,D.closed.length);st.pick=null;break;
+  case"mdel":D.closed.splice(st.mi,1);clamp();st.pick=null;save();break;
+  case"addcard":{const q=$("#c-q").value.trim(),an=$("#c-a").value.trim();if(!q||!an)return;D.cards.push(norm({q,a:an}));$("#c-q").value=$("#c-a").value="";st.flip=false;save();break}
+  case"addopen":{const q=$("#o-q").value.trim(),an=$("#o-a").value.trim();if(!q||!an)return;D.open.push({q,a:an});$("#o-q").value=$("#o-a").value="";st.oi=D.open.length-1;st.rev=false;st.draft="";save();break}
+  case"addmc":{const q=$("#m-q").value.trim();const o=[0,1,2,3].map(i=>$("#m-o"+i).value.trim()).filter(Boolean);const c=+$("#m-c").value;
+   if(!q||o.length<2||c>=o.length)return;D.closed.push({q,o,c});["#m-q","#m-o0","#m-o1","#m-o2","#m-o3"].forEach(s=>$(s).value="");st.mi=D.closed.length-1;st.pick=null;save();break}
+  case"clear":if(!st.arm){st.arm=true}else{D={cards:[],open:[],closed:[]};st.arm=false;st.ci=st.oi=st.mi=0;save()}break;
+ }
+ render();
+});
+document.addEventListener("keydown",e=>{
+ if(st.tab!=="cards"||/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||!st.cur)return;
+ if((e.key===" "||e.key==="Enter")&&!st.flip){e.preventDefault();st.flip=true;render()}
+ else if(st.flip&&["1","2","3","4"].includes(e.key)){const c=st.cur;Object.assign(c,sched(c,+e.key-1));st.flip=false;save();render()}
+});
+document.addEventListener("change",e=>{
+ if(e.target.id!=="imp")return;const f=e.target.files[0];if(!f)return;
+ f.text().then(t=>{try{const j=JSON.parse(t);if(j&&j.cards&&j.open&&j.closed){D=j;D.cards=D.cards.map(norm);save();clamp();st.flip=false;render()}}catch(err){}});
+});
+render();
+</script>
+</body>
+</html>
